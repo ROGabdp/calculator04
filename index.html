@@ -58,7 +58,7 @@
 
         .function-row {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             margin-bottom: 10px;
         }
@@ -103,6 +103,11 @@
 
         button.function:hover {
             background: #45a049;
+        }
+
+        /* cube-btn 使用 .function 的預設樣式，與其他工程函數按鈕保持一致 */
+        button.cube-btn {
+            /* 繼承 .function 樣式 */
         }
 
         button.clear {
@@ -153,6 +158,7 @@
             <button class="clear" onclick="handleClearClick()">C</button>
             <button class="function" onclick="handleUnaryOperatorClick('sqrt')">√</button>
             <button class="function" onclick="handleUnaryOperatorClick('square')">x²</button>
+            <button class="function cube-btn" onclick="handleUnaryOperatorClick('cube')">x³</button>
             <button class="function" onclick="handleUnaryOperatorClick('sin')">sin</button>
             <button class="function" onclick="handleUnaryOperatorClick('cos')">cos</button>
         </div>
@@ -346,6 +352,15 @@
         }
 
         /**
+         * 三次方運算
+         * @param {number} x - 要計算三次方的數字（底數）
+         * @returns {number} x 的三次方
+         */
+        function cube(x) {
+            return x ** 3;
+        }
+
+        /**
          * 開根號運算
          * @param {number} x - 要計算平方根的數字
          * @returns {number} x 的平方根
@@ -506,8 +521,8 @@
         }
 
         /**
-         * 處理單運算元運算子點擊（√, x², sin, cos）
-         * @param {string} operator - 運算子符號（"sqrt", "square", "sin", "cos"）
+         * 處理單運算元運算子點擊（√, x², x³, sin, cos）
+         * @param {string} operator - 運算子符號（"sqrt", "square", "cube", "sin", "cos"）
          */
         function handleUnaryOperatorClick(operator) {
             // 如果處於錯誤狀態，先重置
@@ -523,6 +538,9 @@
                 switch (operator) {
                     case 'square':
                         result = square(inputValue);
+                        break;
+                    case 'cube':
+                        result = cube(inputValue);
                         break;
                     case 'sqrt':
                         result = sqrt(inputValue);
