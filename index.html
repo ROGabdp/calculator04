@@ -58,9 +58,13 @@
 
         .function-row {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 10px;
+        }
+
+        .function-row:has(button:nth-child(2):last-child) {
+            grid-template-columns: repeat(2, 1fr);
         }
 
         button {
@@ -159,6 +163,8 @@
             <button class="function" onclick="handleUnaryOperatorClick('sqrt')">√</button>
             <button class="function" onclick="handleUnaryOperatorClick('square')">x²</button>
             <button class="function cube-btn" onclick="handleUnaryOperatorClick('cube')">x³</button>
+        </div>
+        <div class="function-row">
             <button class="function" onclick="handleUnaryOperatorClick('sin')">sin</button>
             <button class="function" onclick="handleUnaryOperatorClick('cos')">cos</button>
         </div>
