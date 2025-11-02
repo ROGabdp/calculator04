@@ -1,0 +1,33 @@
+{
+  "name": "engineering-calculator",
+  "version": "1.0.0",
+  "description": "工程用計算機 - 支援基本四則運算與工程函數",
+  "main": "index.html",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "calculator",
+    "engineering",
+    "math"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "**/*.{js,html}",
+      "!**/node_modules/**",
+      "!**/tests/**"
+    ]
+  }
+}

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程用計算機</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .calculator {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #display {
+            width: 100%;
+            height: 80px;
+            font-size: 2.5em;
+            text-align: right;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f5f5f5;
+            color: #333;
+            font-weight: 600;
+        }
+
+        #display.error {
+            background: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .function-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 20px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            background: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        button.operator {
+            background: #ff9500;
+            color: white;
+        }
+
+        button.operator:hover {
+            background: #e68600;
+        }
+
+        button.function {
+            background: #4caf50;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        button.function:hover {
+            background: #45a049;
+        }
+
+        button.clear {
+            background: #f44336;
+            color: white;
+        }
+
+        button.clear:hover {
+            background: #da190b;
+        }
+
+        button.equals {
+            background: #2196f3;
+            color: white;
+        }
+
+        button.equals:hover {
+            background: #0b7dda;
+        }
+
+        @media (max-width: 500px) {
+            .calculator {
+                padding: 20px;
+            }
+
+            #display {
+                font-size: 2em;
+                height: 60px;
+            }
+
+            button {
+                padding: 15px;
+                font-size: 1.2em;
+            }
+
+            button.function {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" readonly value="0">
+
+        <!-- 工程函數列 -->
+        <div class="function-row">
+            <button class="clear" onclick="handleClearClick()">C</button>
+            <button class="function" onclick="handleUnaryOperatorClick('sqrt')">√</button>
+            <button class="function" onclick="handleUnaryOperatorClick('square')">x²</button>
+            <button class="function" onclick="handleUnaryOperatorClick('sin')">sin</button>
+            <button class="function" onclick="handleUnaryOperatorClick('cos')">cos</button>
+        </div>
+
+        <!-- 數字與運算鍵盤 -->
+        <div class="button-grid">
+            <button onclick="handleNumberClick('7')">7</button>
+            <button onclick="handleNumberClick('8')">8</button>
+            <button onclick="handleNumberClick('9')">9</button>
+            <button class="operator" onclick="handleOperatorClick('÷')">÷</button>
+
+            <button onclick="handleNumberClick('4')">4</button>
+            <button onclick="handleNumberClick('5')">5</button>
+            <button onclick="handleNumberClick('6')">6</button>
+            <button class="operator" onclick="handleOperatorClick('×')">×</button>
+
+            <button onclick="handleNumberClick('1')">1</button>
+            <button onclick="handleNumberClick('2')">2</button>
+            <button onclick="handleNumberClick('3')">3</button>
+            <button class="operator" onclick="handleOperatorClick('-')">-</button>
+
+            <button onclick="handleNumberClick('0')">0</button>
+            <button onclick="handleNumberClick('.')">.</button>
+            <button class="equals" onclick="handleEqualsClick()">=</button>
+            <button class="operator" onclick="handleOperatorClick('+')">+</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 計算機狀態 ====================
+        // 計算機的當前狀態
+        const calculatorState = {
+            displayValue: '0',           // 顯示螢幕上的值
+            firstOperand: null,          // 第一個運算元
+            operator: null,              // 當前運算子
+            waitingForSecondOperand: false,  // 是否等待輸入第二個運算元
+            isError: false               // 當前是否處於錯誤狀態
+        };
+
+        // ==================== 工具函數 ====================
+
+        /**
+         * 重置計算機狀態
+         * 重置所有狀態為初始值
+         */
+        function resetCalculator() {
+            calculatorState.displayValue = '0';
+            calculatorState.firstOperand = null;
+            calculatorState.operator = null;
+            calculatorState.waitingForSecondOperand = false;
+            calculatorState.isError = false;
+            updateDisplay('0');
+        }
+
+        /**
+         * 更新顯示螢幕的值
+         * @param {string} value - 要顯示的值
+         */
+        function updateDisplay(value) {
+            const display = document.getElementById('display');
+            display.value = value;
+            display.classList.remove('error');
+        }
+
+        /**
+         * 顯示錯誤訊息
+         * @param {string} message - 錯誤訊息
+         */
+        function displayError(message) {
+            const display = document.getElementById('display');
+            display.value = '錯誤：' + message;
+            display.classList.add('error');
+            calculatorState.isError = true;
+
+            // 2 秒後移除錯誤樣式
+            setTimeout(() => {
+                display.classList.remove('error');
+            }, 2000);
+        }
+
+        /**
+         * 驗證輸入是否為有效數字
+         * @param {string} input - 使用者輸入的字串
+         * @returns {{isValid: boolean, errorMessage: string|null, value: number|null}}
+         */
+        function validateInput(input) {
+            // 移除前導零（除了 "0." 的情況）
+            if (input.length > 1 && input[0] === '0' && input[1] !== '.') {
+                input = input.substring(1);
+            }
+
+            // 檢查是否包含多個小數點
+            const dotCount = (input.match(/\./g) || []).length;
+            if (dotCount > 1) {
+                return {
+                    isValid: false,
+                    errorMessage: '請輸入有效的數字',
+                    value: null
+                };
+            }
+
+            // 檢查是否為有效數字
+            const value = parseFloat(input);
+            if (isNaN(value) && input !== '.') {
+                return {
+                    isValid: false,
+                    errorMessage: '請輸入有效的數字',
+                    value: null
+                };
+            }
+
+            return {
+                isValid: true,
+                errorMessage: null,
+                value: value
+            };
+        }
+
+        /**
+         * 格式化計算結果
+         * @param {number} value - 要格式化的數值
+         * @returns {string} 格式化後的字串
+         */
+        function formatResult(value) {
+            // 處理特殊值
+            if (!isFinite(value)) {
+                return 'Infinity';
+            }
+            if (isNaN(value)) {
+                return 'NaN';
+            }
+
+            // 格式化為小數點後 6 位，移除尾隨的零
+            let formatted = parseFloat(value.toFixed(6));
+            return formatted.toString();
+        }
+
+        // ==================== 核心計算函數 ====================
+
+        /**
+         * 加法運算
+         * @param {number} a - 第一個運算元
+         * @param {number} b - 第二個運算元
+         * @returns {number} 兩數之和
+         */
+        function add(a, b) {
+            return a + b;
+        }
+
+        /**
+         * 減法運算
+         * @param {number} a - 被減數
+         * @param {number} b - 減數
+         * @returns {number} 兩數之差
+         */
+        function subtract(a, b) {
+            return a - b;
+        }
+
+        /**
+         * 乘法運算
+         * @param {number} a - 第一個運算元
+         * @param {number} b - 第二個運算元
+         * @returns {number} 兩數之積
+         */
+        function multiply(a, b) {
+            return a * b;
+        }
+
+        /**
+         * 除法運算
+         * @param {number} a - 被除數
+         * @param {number} b - 除數
+         * @returns {number} 兩數之商
+         * @throws {Error} 當 b === 0 時拋出錯誤
+         */
+        function divide(a, b) {
+            if (b === 0) {
+                throw new Error('無法除以零');
+            }
+            return a / b;
+        }
+
+        /**
+         * 平方運算
+         * @param {number} x - 要計算平方的數字
+         * @returns {number} x 的平方
+         */
+        function square(x) {
+            return x * x;
+        }
+
+        /**
+         * 開根號運算
+         * @param {number} x - 要計算平方根的數字
+         * @returns {number} x 的平方根
+         * @throws {Error} 當 x < 0 時拋出錯誤
+         */
+        function sqrt(x) {
+            if (x < 0) {
+                throw new Error('無法對負數開根號');
+            }
+            return Math.sqrt(x);
+        }
+
+        /**
+         * 度數轉弧度
+         * @param {number} degrees - 度數
+         * @returns {number} 弧度值
+         */
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        /**
+         * 正弦函數（輸入為度數）
+         * @param {number} degrees - 角度值（度數制）
+         * @returns {number} sin 值
+         */
+        function sin(degrees) {
+            return Math.sin(degreesToRadians(degrees));
+        }
+
+        /**
+         * 餘弦函數（輸入為度數）
+         * @param {number} degrees - 角度值（度數制）
+         * @returns {number} cos 值
+         */
+        function cos(degrees) {
+            return Math.cos(degreesToRadians(degrees));
+        }
+
+        // ==================== 事件處理函數 ====================
+
+        /**
+         * 處理數字按鈕點擊
+         * @param {string} digit - 被點擊的數字（"0" 到 "9" 或 "."）
+         */
+        function handleNumberClick(digit) {
+            // 如果處於錯誤狀態，先重置
+            if (calculatorState.isError) {
+                resetCalculator();
+            }
+
+            const { displayValue, waitingForSecondOperand } = calculatorState;
+
+            // 如果正在等待第二個運算元，清空顯示
+            if (waitingForSecondOperand) {
+                calculatorState.displayValue = digit;
+                calculatorState.waitingForSecondOperand = false;
+            } else {
+                // 如果當前顯示為 "0"，替換為新數字（除非輸入是小數點）
+                calculatorState.displayValue = displayValue === '0' ? digit : displayValue + digit;
+            }
+
+            updateDisplay(calculatorState.displayValue);
+        }
+
+        /**
+         * 處理運算子按鈕點擊
+         * @param {string} operator - 運算子符號（"+", "-", "×", "÷"）
+         */
+        function handleOperatorClick(operator) {
+            // 如果處於錯誤狀態，不執行操作
+            if (calculatorState.isError) {
+                return;
+            }
+
+            const inputValue = parseFloat(calculatorState.displayValue);
+
+            // 如果已有第一個運算元且正在等待第二個運算元，只是更換運算子
+            if (calculatorState.firstOperand === null) {
+                calculatorState.firstOperand = inputValue;
+            } else if (calculatorState.operator) {
+                // 執行之前的運算
+                const result = performCalculation();
+                calculatorState.displayValue = formatResult(result);
+                calculatorState.firstOperand = result;
+            }
+
+            calculatorState.waitingForSecondOperand = true;
+            calculatorState.operator = operator;
+        }
+
+        /**
+         * 執行計算
+         * @returns {number} 計算結果
+         */
+        function performCalculation() {
+            const { firstOperand, displayValue, operator } = calculatorState;
+            const secondOperand = parseFloat(displayValue);
+
+            try {
+                let result;
+                switch (operator) {
+                    case '+':
+                        result = add(firstOperand, secondOperand);
+                        break;
+                    case '-':
+                        result = subtract(firstOperand, secondOperand);
+                        break;
+                    case '×':
+                        result = multiply(firstOperand, secondOperand);
+                        break;
+                    case '÷':
+                        result = divide(firstOperand, secondOperand);
+                        break;
+                    default:
+                        return secondOperand;
+                }
+                return result;
+            } catch (error) {
+                displayError(error.message);
+                return 0;
+            }
+        }
+
+        /**
+         * 處理等號按鈕點擊
+         */
+        function handleEqualsClick() {
+            // 如果處於錯誤狀態，不執行操作
+            if (calculatorState.isError) {
+                return;
+            }
+
+            // 如果沒有運算子，不執行計算
+            if (calculatorState.operator === null) {
+                return;
+            }
+
+            const result = performCalculation();
+
+            // 如果沒有錯誤，更新顯示
+            if (!calculatorState.isError) {
+                calculatorState.displayValue = formatResult(result);
+                updateDisplay(calculatorState.displayValue);
+            }
+
+            // 重置運算狀態
+            calculatorState.firstOperand = null;
+            calculatorState.operator = null;
+            calculatorState.waitingForSecondOperand = false;
+        }
+
+        /**
+         * 處理清除按鈕點擊
+         */
+        function handleClearClick() {
+            resetCalculator();
+        }
+
+        /**
+         * 處理單運算元運算子點擊（√, x², sin, cos）
+         * @param {string} operator - 運算子符號（"sqrt", "square", "sin", "cos"）
+         */
+        function handleUnaryOperatorClick(operator) {
+            // 如果處於錯誤狀態，先重置
+            if (calculatorState.isError) {
+                resetCalculator();
+                return;
+            }
+
+            const inputValue = parseFloat(calculatorState.displayValue);
+
+            try {
+                let result;
+                switch (operator) {
+                    case 'square':
+                        result = square(inputValue);
+                        break;
+                    case 'sqrt':
+                        result = sqrt(inputValue);
+                        break;
+                    case 'sin':
+                        result = sin(inputValue);
+                        break;
+                    case 'cos':
+                        result = cos(inputValue);
+                        break;
+                    default:
+                        return;
+                }
+
+                calculatorState.displayValue = formatResult(result);
+                updateDisplay(calculatorState.displayValue);
+
+                // 單運算元操作後，重置運算狀態
+                calculatorState.firstOperand = null;
+                calculatorState.operator = null;
+                calculatorState.waitingForSecondOperand = false;
+            } catch (error) {
+                displayError(error.message);
+            }
+        }
+
+        // 初始化顯示
+        updateDisplay(calculatorState.displayValue);
+    </script>
+</body>
+</html>
