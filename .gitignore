@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Node.js / JavaScript / TypeScript
 node_modules/
 npm-debug.log*
@@ -25,11 +26,25 @@ build/
 .env.production
 
 # IDE
+=======
+# 依賴套件
+node_modules/
+
+# 測試覆蓋率報告
+coverage/
+
+# 作業系統檔案
+.DS_Store
+Thumbs.db
+
+# 編輯器設定
+>>>>>>> Stashed changes
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+<<<<<<< Updated upstream
 .DS_Store
 Thumbs.db
 
@@ -40,3 +55,18 @@ logs/
 # Temporary files
 *.tmp
 .cache/
+=======
+
+# 日誌檔案
+*.log
+npm-debug.log*
+
+# 環境變數
+.env
+.env.local
+.env.*.local
+
+# 建置輸出
+dist/
+build/
+>>>>>>> Stashed changes
